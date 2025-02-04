@@ -68,10 +68,10 @@
         <div id="main">
                 <form id="form">
                     <label for="site_link">Ссылка на сайт клиента</label>
-                    <input type="text" id="client_sait" name="client_sait"><br>
+                    <input type="text" id="site_link" name="site_link"><br>
 
                     <label for="contact_client">Тг клиента либо номер</label>
-                    <input type="text" id="client_sait" name="client_sait"><br>
+                    <input type="text" id="contact_client" name="contact_client"><br>
                     
                     <div id="error" style="color: red;"></div>
                     <button type="button" id="submit">Submit</button>
@@ -85,13 +85,13 @@
 
                     submit.addEventListener("click", (event) => {
                         event.preventDefault();
-                        let client_sait = document.getElementById("client_sait").value;
+                        let site_link = document.getElementById("site_link").value;
                         let contact_client = document.getElementById("contact_client").value;
 
                         contact_client = contact_client.replace(/\s+/g, '').replace(/\+/g, '');
                         const tgPattern = /^(https:\/\/t\.me\/[a-zA-Z0-9_]+|7\d{10}|Скрыт)$/;
 
-                        if (client_sait.length < 4) {
+                        if (site_link.length < 4) {
                             document.getElementById("error").innerText = "Сайт клиента должен содержать минимум 4 символов.";
                             return;
                         }
@@ -103,7 +103,7 @@
 
                         let data = {
                             action: "search_client",
-                            client_sait: client_sait,
+                            site_link: site_link,
                             contact_client: contact_client
                         };
                 
