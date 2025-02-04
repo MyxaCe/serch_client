@@ -91,12 +91,12 @@
                         contact_client = contact_client.replace(/\s+/g, '').replace(/\+/g, '');
                         const tgPattern = /^(https:\/\/t\.me\/[a-zA-Z0-9_]+|7\d{10}|Скрыт)$/;
 
-                        if (site_link.length < 4) {
+                        if (site_link.length > 0) {
                             document.getElementById("error").innerText = "Сайт клиента должен содержать минимум 4 символов.";
                             return;
                         }
                         
-                        if (!tgPattern.test(contact_client)) {
+                        if (contact_client.length > 0 && !tgPattern.test(contact_client)) {
                             document.getElementById("error").innerText = "Telegram клиента должен быть в формате https://t.me/username, номер телефона в формате 79000000000 или 'Скрыт'.";
                             return;
                         }
