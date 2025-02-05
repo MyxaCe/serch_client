@@ -328,6 +328,7 @@
                 console.log(`Loading clients for date: ${date} and user_id: ${userId}`);
                 if (!userId) {
                     console.error("User ID is undefined");
+                    console.log("initDataUnsafe:", tg.initDataUnsafe);
                     return;
                 }
                 let response = await fetch(`/api/get_clients?date=${date}&user_id=${userId}`);
