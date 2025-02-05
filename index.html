@@ -86,6 +86,16 @@
                 background-color: #fff;
                 width: 100%;
                 transition: all 0.3s ease;
+                opacity: 0;
+            }
+
+            .client-details.show {
+                display: flex;
+                opacity: 1;
+            }
+
+            .client-details.hide {
+                opacity: 0;
             }
 
             .client-details input {
@@ -285,14 +295,18 @@
                     let clientRow = event.target;
                     let clientDetails = clientRow.nextElementSibling;
                     if (clientDetails && clientDetails.classList.contains("client-details")) {
-                        if (clientDetails.style.display === "none" || clientDetails.style.display === "") {
-                            clientDetails.style.display = "flex";
-                            clientDetails.style.maxHeight = clientDetails.scrollHeight + "px";
-                        } else {
-                            clientDetails.style.maxHeight = "0";
+                        if (clientDetails.classList.contains("show")) {
+                            clientDetails.classList.remove("show");
+                            clientDetails.classList.add("hide");
                             setTimeout(() => {
                                 clientDetails.style.display = "none";
                             }, 300);
+                        } else {
+                            clientDetails.style.display = "flex";
+                            setTimeout(() => {
+                                clientDetails.classList.remove("hide");
+                                clientDetails.classList.add("show");
+                            }, 10);
                         }
                     } else {
                         let clientData = JSON.parse(clientRow.dataset.client);
@@ -382,7 +396,7 @@
                 clientRow.insertAdjacentElement("afterend", clientDetails);
                 setTimeout(() => {
                     clientDetails.style.display = "flex";
-                    clientDetails.style.maxHeight = clientDetails.scrollHeight + "px";
+                    clientDetails.classList.add("show");
                 }, 10);
 
                 clientDetails.querySelector(".edit-submit").addEventListener("click", (event) => {
@@ -447,7 +461,8 @@
             function hideClientDetails() {
                 let clientDetails = document.querySelector(".client-details");
                 if (clientDetails) {
-                    clientDetails.style.maxHeight = "0";
+                    clientDetails.classList.remove("show");
+                    clientDetails.classList.add("hide");
                     setTimeout(() => {
                         clientDetails.style.display = "none";
                     }, 300);
