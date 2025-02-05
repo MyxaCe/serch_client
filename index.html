@@ -272,6 +272,7 @@
                     contact_client: contact_client
                 };
         
+                console.log(`Sending data: ${JSON.stringify(data)}`);
                 tg.sendData(JSON.stringify(data));
                 tg.close();
             });
@@ -321,9 +322,17 @@
 
             async function loadClients() {
                 let date = searchDateInput.value;
-                let userId = tg.initDataUnsafe.user.id;
+                let userId = tg.initDataUnsafe.user?.id;
                 console.log(`Loading clients for date: ${date} and user_id: ${userId}`);
+                if (!userId) {
+                    console.error("User ID is undefined");
+                    return;
+                }
                 let response = await fetch(`/api/get_clients?date=${date}&user_id=${userId}`);
+                if (!response.ok) {
+                    console.error(`Failed to fetch clients: ${response.statusText}`);
+                    return;
+                }
                 let clients = await response.json();
                 console.log(`Received clients: ${JSON.stringify(clients)}`);
 
@@ -448,6 +457,7 @@
                         return;
                     }
 
+                    console.log(`Sending data: ${JSON.stringify(clientData)}`);
                     tg.sendData(JSON.stringify(clientData));
                     tg.close();
                 });
