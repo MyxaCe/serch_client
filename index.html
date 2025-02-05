@@ -69,6 +69,7 @@
                 padding: 10px;
                 border-bottom: 1px solid #ccc;
                 cursor: pointer;
+                transition: all 0.3s ease;
             }
 
             .client-row:hover {
@@ -84,10 +85,12 @@
                 border-radius: 5px;
                 background-color: #fff;
                 position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
                 z-index: 1000;
+                transition: all 0.3s ease;
             }
 
             .client-details input {
@@ -167,6 +170,24 @@
                 align-items: center;
                 gap: 10px;
             }
+
+            .date-navigation button {
+                border-radius: 50%;
+                border: 2px solid #ccc;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 20px;
+                background-color: white;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .date-navigation button:hover {
+                background-color: #f0f0f0;
+            }
         </style>
     </head>
     <body>
@@ -201,6 +222,7 @@
 
             <div class="overlay" id="overlay"></div>
             <div class="client-details" id="client-details">
+                <h2 id="client-title"></h2>
                 <form id="edit-client-form">
                     <label for="edit-client_sait">Сайт клиента:</label>
                     <input type="text" id="edit-client_sait" name="client_sait"><br>
@@ -237,6 +259,7 @@
             let overlay = document.getElementById("overlay");
             let clientDetails = document.getElementById("client-details");
             let editSubmit = document.getElementById("edit-submit");
+            let clientTitle = document.getElementById("client-title");
 
             tg.expand();
 
@@ -386,13 +409,18 @@
                 document.getElementById("edit-client_tg").value = clientData.contact_client;
                 document.getElementById("edit-sail_name").value = clientData.name_sail;
 
-                overlay.style.display = "block";
+                clientTitle.innerText = `${clientData.name_client} - ${clientData.contact_client}`;
                 clientDetails.style.display = "flex";
+                overlay.style.display = "block";
+                clientDetails.style.transform = "translateY(0)";
             }
 
             function hideClientDetails() {
-                overlay.style.display = "none";
-                clientDetails.style.display = "none";
+                clientDetails.style.transform = "translateY(-100%)";
+                setTimeout(() => {
+                    clientDetails.style.display = "none";
+                    overlay.style.display = "none";
+                }, 300);
             }
 
             window.addEventListener('load', () => {
