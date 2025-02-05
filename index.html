@@ -160,6 +160,13 @@
             .slider.round:before {
                 border-radius: 50%;
             }
+
+            .date-navigation {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+            }
         </style>
     </head>
     <body>
@@ -184,7 +191,7 @@
             </div>
 
             <div id="edit-form" style="display: none;">
-                <div>
+                <div class="date-navigation">
                     <button type="button" id="prev-date">←</button>
                     <input type="date" id="search-date">
                     <button type="button" id="next-date">→</button>
