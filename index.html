@@ -245,6 +245,12 @@
 
             console.log("Telegram WebApp initDataUnsafe:", tg.initDataUnsafe);
 
+            const userId = tg.initDataUnsafe.user?.id;
+            if (!userId) {
+                console.error("User ID is undefined");
+                console.log("initDataUnsafe:", tg.initDataUnsafe);
+            }
+
             modeSwitch.addEventListener("change", () => {
                 if (modeSwitch.checked) {
                     searchForm.style.display = "none";
@@ -271,7 +277,8 @@
                 let data = {
                     action: "search_client",
                     site_link: site_link,
-                    contact_client: contact_client
+                    contact_client: contact_client,
+                    user_id: userId
                 };
         
                 console.log(`Sending data: ${JSON.stringify(data)}`);
@@ -324,11 +331,9 @@
 
             async function loadClients() {
                 let date = searchDateInput.value;
-                let userId = tg.initDataUnsafe.user?.id;
                 console.log(`Loading clients for date: ${date} and user_id: ${userId}`);
                 if (!userId) {
                     console.error("User ID is undefined");
-                    console.log("initDataUnsafe:", tg.initDataUnsafe);
                     return;
                 }
                 let response = await fetch(`/api/get_clients?date=${date}&user_id=${userId}`);
@@ -414,7 +419,8 @@
                         date: clientDetails.querySelector("#edit-date").value,
                         client_name: clientDetails.querySelector("#edit-client_name").value,
                         client_tg: clientDetails.querySelector("#edit-client_tg").value,
-                        sail_name: clientDetails.querySelector("#edit-sail_name").value
+                        sail_name: clientDetails.querySelector("#edit-sail_name").value,
+                        user_id: userId
                     };
 
                     const tgPattern = /^(https:\/\/t\.me\/[a-zA-Z0-9_]+|7\d{10}|Скрыт)$/;
