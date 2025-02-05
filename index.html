@@ -319,18 +319,10 @@
                 hideClientDetails();
             });
 
-            function loadClients() {
-                // Загрузите клиентов за выбранную дату и отобразите их в clientList
-                // Пример данных клиента:
-                let clients = [
-                    {
-                        site_link: "example.com",
-                        date: "2023-10-01",
-                        name_client: "Иван Иванов",
-                        contact_client: "https://t.me/ivan",
-                        name_sail: "Петр Петров"
-                    }
-                ];
+            async function loadClients() {
+                let date = searchDateInput.value;
+                let response = await fetch(`/api/get_clients?date=${date}`);
+                let clients = await response.json();
 
                 clientList.innerHTML = "";
                 clients.forEach(client => {
