@@ -109,15 +109,66 @@
                 background-color: rgba(0, 0, 0, 0.5);
                 z-index: 999;
             }
+
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 60px;
+                height: 34px;
+            }
+
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                transition: .4s;
+            }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                transition: .4s;
+            }
+
+            input:checked + .slider {
+                background-color: #2196F3;
+            }
+
+            input:checked + .slider:before {
+                transform: translateX(26px);
+            }
+
+            .slider.round {
+                border-radius: 34px;
+            }
+
+            .slider.round:before {
+                border-radius: 50%;
+            }
         </style>
     </head>
     <body>
         <div id="main">
             <label for="mode">Режим:</label>
-            <select id="mode">
-                <option value="search">Поиск</option>
-                <option value="edit">Изменение</option>
-            </select>
+            <label class="switch">
+                <input type="checkbox" id="mode">
+                <span class="slider round"></span>
+            </label>
 
             <div id="search-form">
                 <form id="form">
@@ -165,10 +216,11 @@
             </div>
         </div>
         <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+        <script src="style.js"></script>
         <script>
             let tg = window.Telegram.WebApp;
             let submit = document.getElementById("submit");
-            let modeSelect = document.getElementById("mode");
+            let modeSwitch = document.getElementById("mode");
             let searchForm = document.getElementById("search-form");
             let editForm = document.getElementById("edit-form");
             let prevDateBtn = document.getElementById("prev-date");
@@ -181,13 +233,13 @@
 
             tg.expand();
 
-            modeSelect.addEventListener("change", () => {
-                if (modeSelect.value === "search") {
-                    searchForm.style.display = "block";
-                    editForm.style.display = "none";
-                } else {
+            modeSwitch.addEventListener("change", () => {
+                if (modeSwitch.checked) {
                     searchForm.style.display = "none";
                     editForm.style.display = "block";
+                } else {
+                    searchForm.style.display = "block";
+                    editForm.style.display = "none";
                 }
             });
 
