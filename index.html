@@ -243,14 +243,6 @@
 
             tg.expand();
 
-            console.log("Telegram WebApp initDataUnsafe:", tg.initDataUnsafe);
-
-            const userId = tg.initDataUnsafe.user?.id;
-            if (!userId) {
-                console.error("User ID is undefined");
-                console.log("initDataUnsafe:", tg.initDataUnsafe);
-            }
-
             modeSwitch.addEventListener("change", () => {
                 if (modeSwitch.checked) {
                     searchForm.style.display = "none";
@@ -277,11 +269,9 @@
                 let data = {
                     action: "search_client",
                     site_link: site_link,
-                    contact_client: contact_client,
-                    user_id: userId
+                    contact_client: contact_client
                 };
         
-                console.log(`Sending data: ${JSON.stringify(data)}`);
                 tg.sendData(JSON.stringify(data));
                 tg.close();
             });
@@ -290,6 +280,7 @@
                 let date = new Date(searchDateInput.value);
                 date.setDate(date.getDate() - 1);
                 searchDateInput.value = date.toISOString().split('T')[0];
+                sendDateUpdate(date.toISOString().split('T')[0]);
                 loadClients();
             });
 
@@ -297,8 +288,25 @@
                 let date = new Date(searchDateInput.value);
                 date.setDate(date.getDate() + 1);
                 searchDateInput.value = date.toISOString().split('T')[0];
+                sendDateUpdate(date.toISOString().split('T')[0]);
                 loadClients();
             });
+
+            async function sendDateUpdate(date) {
+                try {
+                    let response = await fetch("/webhook", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ action: "update_date", date: date })
+                    });
+                    let result = await response.json();
+                    console.log(result);
+                } catch (error) {
+                    console.error("Ошибка при отправке данных на веб-хук:", error);
+                }
+            }
 
             clientList.addEventListener("click", (event) => {
                 if (event.target.classList.contains("client-row")) {
@@ -329,20 +337,18 @@
                 hideClientDetails();
             });
 
-            async function loadClients() {
-                let date = searchDateInput.value;
-                console.log(`Loading clients for date: ${date} and user_id: ${userId}`);
-                if (!userId) {
-                    console.error("User ID is undefined");
-                    return;
-                }
-                let response = await fetch(`/api/get_clients?date=${date}&user_id=${userId}`);
-                if (!response.ok) {
-                    console.error(`Failed to fetch clients: ${response.statusText}`);
-                    return;
-                }
-                let clients = await response.json();
-                console.log(`Received clients: ${JSON.stringify(clients)}`);
+            function loadClients() {
+                // Загрузите клиентов за выбранную дату и отобразите их в clientList
+                // Пример данных клиента:
+                let clients = [
+                    {
+                        site_link: "example.com",
+                        date: "2023-10-01",
+                        name_client: "Иван Иванов",
+                        contact_client: "https://t.me/ivan",
+                        name_sail: "Петр Петров"
+                    }
+                ];
 
                 clientList.innerHTML = "";
                 clients.forEach(client => {
@@ -419,8 +425,7 @@
                         date: clientDetails.querySelector("#edit-date").value,
                         client_name: clientDetails.querySelector("#edit-client_name").value,
                         client_tg: clientDetails.querySelector("#edit-client_tg").value,
-                        sail_name: clientDetails.querySelector("#edit-sail_name").value,
-                        user_id: userId
+                        sail_name: clientDetails.querySelector("#edit-sail_name").value
                     };
 
                     const tgPattern = /^(https:\/\/t\.me\/[a-zA-Z0-9_]+|7\d{10}|Скрыт)$/;
@@ -466,7 +471,6 @@
                         return;
                     }
 
-                    console.log(`Sending data: ${JSON.stringify(clientData)}`);
                     tg.sendData(JSON.stringify(clientData));
                     tg.close();
                 });
