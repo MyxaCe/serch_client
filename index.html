@@ -31,7 +31,7 @@
                 text-align: center;
             }
 
-            input {
+            input, select {
                 width: 90%;
                 outline: none;
                 margin: 10px 5%;
@@ -41,7 +41,7 @@
                 border-radius: 5px;
             }
 
-            input:focus {
+            input:focus, select:focus {
                 border-color: #db5d5d;
             }
 
@@ -62,10 +62,64 @@
             button:hover {
                 background:rgb(196, 196, 196);
             }
+
+            .client-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px;
+                border-bottom: 1px solid #ccc;
+                cursor: pointer;
+            }
+
+            .client-row:hover {
+                background-color: #f0f0f0;
+            }
+
+            .client-details {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #fff;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+            }
+
+            .client-details input {
+                width: 80%;
+                margin: 10px 0;
+            }
+
+            .client-details button {
+                width: 50%;
+            }
+
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
         </style>
     </head>
     <body>
         <div id="main">
+            <label for="mode">Режим:</label>
+            <select id="mode">
+                <option value="search">Поиск</option>
+                <option value="edit">Изменение</option>
+            </select>
+
+            <div id="search-form">
                 <form id="form">
                     <label for="site_link">Ссылка на сайт клиента</label>
                     <input type="text" id="site_link" name="site_link"><br>
@@ -76,35 +130,220 @@
                     <div id="error" style="color: red;"></div>
                     <button type="button" id="submit">Submit</button>
                 </form>
+            </div>
+
+            <div id="edit-form" style="display: none;">
+                <div>
+                    <button type="button" id="prev-date">←</button>
+                    <input type="date" id="search-date">
+                    <button type="button" id="next-date">→</button>
+                </div>
+                <div id="client-list"></div>
+            </div>
+
+            <div class="overlay" id="overlay"></div>
+            <div class="client-details" id="client-details">
+                <form id="edit-client-form">
+                    <label for="edit-client_sait">Сайт клиента:</label>
+                    <input type="text" id="edit-client_sait" name="client_sait"><br>
+
+                    <label for="edit-date">Дата:</label>
+                    <input type="date" id="edit-date" name="date"><br>
+
+                    <label for="edit-client_name">Имя клиента:</label>
+                    <input type="text" id="edit-client_name" name="client_name"><br>
+
+                    <label for="edit-client_tg">Telegram клиента:</label>
+                    <input type="text" id="edit-client_tg" name="client_tg"><br>
+
+                    <label for="edit-sail_name">Сейл:</label>
+                    <input type="text" id="edit-sail_name" name="sail_name"><br>
+
+                    <div id="edit-error" style="color: red;"></div>
+                    <button type="button" id="edit-submit">Изменить</button>
+                </form>
+            </div>
         </div>
-                <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-                <script>
-                    let tg = window.Telegram.WebApp;
-                    let submit = document.getElementById("submit");
-                    tg.expand();
+        <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+        <script>
+            let tg = window.Telegram.WebApp;
+            let submit = document.getElementById("submit");
+            let modeSelect = document.getElementById("mode");
+            let searchForm = document.getElementById("search-form");
+            let editForm = document.getElementById("edit-form");
+            let prevDateBtn = document.getElementById("prev-date");
+            let nextDateBtn = document.getElementById("next-date");
+            let searchDateInput = document.getElementById("search-date");
+            let clientList = document.getElementById("client-list");
+            let overlay = document.getElementById("overlay");
+            let clientDetails = document.getElementById("client-details");
+            let editSubmit = document.getElementById("edit-submit");
 
-                    submit.addEventListener("click", (event) => {
-                        event.preventDefault();
-                        let site_link = document.getElementById("site_link").value;
-                        let contact_client = document.getElementById("contact_client").value;
+            tg.expand();
 
-                        contact_client = contact_client.replace(/\s+/g, '').replace(/\+/g, '');
-                        const tgPattern = /^(https:\/\/t\.me\/[a-zA-Z0-9_]+|7\d{10}|Скрыт)$/;
-                        
-                        if (contact_client.length > 0 && !tgPattern.test(contact_client)) {
-                            document.getElementById("error").innerText = "Telegram клиента должен быть в формате https://t.me/username, номер телефона в формате 79000000000 или 'Скрыт'.";
-                            return;
-                        }
+            modeSelect.addEventListener("change", () => {
+                if (modeSelect.value === "search") {
+                    searchForm.style.display = "block";
+                    editForm.style.display = "none";
+                } else {
+                    searchForm.style.display = "none";
+                    editForm.style.display = "block";
+                }
+            });
 
-                        let data = {
-                            action: "search_client",
-                            site_link: site_link,
-                            contact_client: contact_client
-                        };
+            submit.addEventListener("click", (event) => {
+                event.preventDefault();
+                let site_link = document.getElementById("site_link").value;
+                let contact_client = document.getElementById("contact_client").value;
+
+                contact_client = contact_client.replace(/\s+/g, '').replace(/\+/g, '');
+                const tgPattern = /^(https:\/\/t\.me\/[a-zA-Z0-9_]+|7\d{10}|Скрыт)$/;
                 
-                        tg.sendData(JSON.stringify(data));
-                        tg.close();
-                    });
-                </script>
+                if (contact_client.length > 0 && !tgPattern.test(contact_client)) {
+                    document.getElementById("error").innerText = "Telegram клиента должен быть в формате https://t.me/username, номер телефона в формате 79000000000 или 'Скрыт'.";
+                    return;
+                }
+
+                let data = {
+                    action: "search_client",
+                    site_link: site_link,
+                    contact_client: contact_client
+                };
+        
+                tg.sendData(JSON.stringify(data));
+                tg.close();
+            });
+
+            prevDateBtn.addEventListener("click", () => {
+                let date = new Date(searchDateInput.value);
+                date.setDate(date.getDate() - 1);
+                searchDateInput.value = date.toISOString().split('T')[0];
+                loadClients();
+            });
+
+            nextDateBtn.addEventListener("click", () => {
+                let date = new Date(searchDateInput.value);
+                date.setDate(date.getDate() + 1);
+                searchDateInput.value = date.toISOString().split('T')[0];
+                loadClients();
+            });
+
+            clientList.addEventListener("click", (event) => {
+                if (event.target.classList.contains("client-row")) {
+                    let clientData = JSON.parse(event.target.dataset.client);
+                    showClientDetails(clientData);
+                }
+            });
+
+            overlay.addEventListener("click", () => {
+                hideClientDetails();
+            });
+
+            editSubmit.addEventListener("click", (event) => {
+                event.preventDefault();
+                let clientData = {
+                    action: "edit_client",
+                    client_sait: document.getElementById("edit-client_sait").value,
+                    date: document.getElementById("edit-date").value,
+                    client_name: document.getElementById("edit-client_name").value,
+                    client_tg: document.getElementById("edit-client_tg").value,
+                    sail_name: document.getElementById("edit-sail_name").value
+                };
+
+                const tgPattern = /^(https:\/\/t\.me\/[a-zA-Z0-9_]+|7\d{10}|Скрыт)$/;
+
+                if (clientData.client_sait.length < 4) {
+                    document.getElementById("edit-error").innerText = "Сайт клиента должен содержать минимум 4 символов.";
+                    return;
+                }
+
+                if (!clientData.date) {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    clientData.date = `${year}-${month}-${day}`;
+                    document.getElementById("edit-date").value = clientData.date;
+                }
+        
+                const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+                if (!datePattern.test(clientData.date)) {
+                    document.getElementById("edit-error").innerText = "Дата должна быть в формате YYYY-MM-DD.";
+                    return;
+                }
+        
+                const parsedDate = new Date(clientData.date);
+                if (isNaN(parsedDate.getTime())) {
+                    document.getElementById("edit-error").innerText = "Некорректная дата.";
+                    return;
+                }
+                
+                if (clientData.client_name.length < 5) {
+                    document.getElementById("edit-error").innerText = "Имя клиента должно содержать минимум 5 символов.";
+                    return;
+                }
+
+                if (!tgPattern.test(clientData.client_tg)) {
+                    document.getElementById("edit-error").innerText = "Telegram клиента должен быть в формате https://t.me/username, номер телефона в формате 79000000000 или 'Скрыт'.";
+                    return;
+                }
+
+                if (clientData.sail_name.length < 5) {
+                    document.getElementById("edit-error").innerText = "Название продажи должно содержать минимум 5 символов.";
+                    return;
+                }
+
+                tg.sendData(JSON.stringify(clientData));
+                tg.close();
+            });
+
+            function loadClients() {
+                // Загрузите клиентов за выбранную дату и отобразите их в clientList
+                // Пример данных клиента:
+                let clients = [
+                    {
+                        site_link: "example.com",
+                        date: "2023-10-01",
+                        name_client: "Иван Иванов",
+                        contact_client: "https://t.me/ivan",
+                        name_sail: "Петр Петров"
+                    }
+                ];
+
+                clientList.innerHTML = "";
+                clients.forEach(client => {
+                    let clientRow = document.createElement("div");
+                    clientRow.classList.add("client-row");
+                    clientRow.dataset.client = JSON.stringify(client);
+                    clientRow.innerText = `${client.site_link} - ${client.name_client} - ${client.contact_client} - ${client.name_sail}`;
+                    clientList.appendChild(clientRow);
+                });
+            }
+
+            function showClientDetails(clientData) {
+                document.getElementById("edit-client_sait").value = clientData.site_link;
+                document.getElementById("edit-date").value = clientData.date;
+                document.getElementById("edit-client_name").value = clientData.name_client;
+                document.getElementById("edit-client_tg").value = clientData.contact_client;
+                document.getElementById("edit-sail_name").value = clientData.name_sail;
+
+                overlay.style.display = "block";
+                clientDetails.style.display = "flex";
+            }
+
+            function hideClientDetails() {
+                overlay.style.display = "none";
+                clientDetails.style.display = "none";
+            }
+
+            window.addEventListener('load', () => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                searchDateInput.value = `${year}-${month}-${day}`;
+                loadClients();
+            });
+        </script>
     </body>
 </html>
