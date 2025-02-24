@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const tg = window.Telegram.WebApp;
     const toggleSwitch = document.getElementById('modeSwitch');
     const modeLabel = document.getElementById('modeLabel');
     const inputContainer = document.getElementById('inputContainer');
