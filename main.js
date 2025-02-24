@@ -3,25 +3,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const modeLabel = document.getElementById('modeLabel');
     const inputContainer = document.getElementById('inputContainer');
     const resultContainer = document.getElementById('resultContainer');
-
-    // Статические данные для тестирования
-    const data = [
-        { id: '1', name: 'Иван Иванов', date: '2023-10-01', site: 'example.com', telegram: '@ivan' },
-        { id: '2', name: 'Петр Петров', date: '2023-10-02', site: 'example.org', telegram: '@petr' },
-        { id: '3', name: 'Сергей Сергеев', date: '2023-10-03', site: 'example.net', telegram: '@sergey' },
-        { id: '4', name: 'Алексей Алексеев', date: '2023-10-04', site: 'example.biz', telegram: '@alexey' },
-        { id: '5', name: 'Мария Мариева', date: '2023-10-05', site: 'example.info', telegram: '@maria' },
-        { id: '6', name: 'Анна Аннова', date: '2023-10-06', site: 'example.co', telegram: '@anna' },
-        { id: '7', name: 'Дмитрий Дмитриев', date: '2023-10-07', site: 'example.io', telegram: '@dmitry' },
-        { id: '8', name: 'Ольга Ольгова', date: '2023-10-08', site: 'example.ai', telegram: '@olga' },
-        { id: '9', name: 'Николай Николаев', date: '2023-10-09', site: 'example.dev', telegram: '@nikolay' },
-        { id: '10', name: 'Елена Еленова', date: '2023-10-10', site: 'example.tech', telegram: '@elena' },
-        { id: '11', name: 'Виктор Викторов', date: '2023-10-11', site: 'example.xyz', telegram: '@viktor' },
-        { id: '12', name: 'Татьяна Татьянова', date: '2023-10-12', site: 'example.site', telegram: '@tatyana' },
-        { id: '13', name: 'Андрей Андреев', date: '2023-10-13', site: 'example.online', telegram: '@andrey' },
-        { id: '14', name: 'Юлия Юлиева', date: '2023-10-14', site: 'example.store', telegram: '@yulia' },
-        { id: '15', name: 'Максим Максимов', date: '2023-10-15', site: 'example.shop', telegram: '@maxim' }
-    ];
+    const dateContainer = document.getElementById('dateContainer');
+    const dateInput = document.getElementById('dateInput');
+    const prevDateButton = document.getElementById('prevDateButton');
+    const nextDateButton = document.getElementById('nextDateButton');
 
     function createClientCard(client) {
         return `
@@ -35,9 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateInputContainer() {
         if (toggleSwitch.checked) {
             modeLabel.textContent = 'Изменение';
-            inputContainer.innerHTML = data.map(createClientCard).join('');
+            inputContainer.style.display = 'none';
+            dateContainer.style.display = 'flex';
+            loadClients();
         } else {
             modeLabel.textContent = 'Поиск';
+            inputContainer.style.display = 'block';
+            dateContainer.style.display = 'none';
             inputContainer.innerHTML = `
                 <input type="text" id="siteInput" placeholder="Сайт">
                 <input type="text" id="telegramInput" placeholder="Телеграмм">
@@ -76,6 +65,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    async function loadClients() {
+        const date = dateInput.value;
+        const response = await fetch(`/clients/${date}`);
+        const clients = await response.json();
+
+        if (response.ok) {
+            resultContainer.innerHTML = clients.map(client => `
+                <div class="client-card">
+                    <h3>${client.name_client}</h3>
+                    <p>Сайт: ${client.site_link}</p>
+                    <p>Телеграмм: ${client.contact_client}</p>
+                    <p>Дата: ${client.date}</p>
+                    <p>Сейл: ${client.name_sail}</p>
+                </div>
+            `).join('');
+        } else {
+            resultContainer.innerHTML = `<p>Клиенты не найдены на дату ${date}.</p>`;
+        }
+    }
+
+    function changeDate(days) {
+        const date = new Date(dateInput.value);
+        date.setDate(date.getDate() + days);
+        dateInput.value = date.toISOString().split('T')[0];
+        loadClients();
+    }
+
+    prevDateButton.addEventListener('click', () => changeDate(-1));
+    nextDateButton.addEventListener('click', () => changeDate(1));
+
     window.editClient = function(clientId) {
         // Логика для редактирования клиента
         const client = data.find(client => client.id === clientId);
@@ -103,5 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleSwitch.addEventListener('change', updateInputContainer);
 
     // Инициализация начального состояния
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
     updateInputContainer();
 });
