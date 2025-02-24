@@ -2,10 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleSwitch = document.getElementById('modeSwitch');
     const modeLabel = document.getElementById('modeLabel');
     const inputContainer = document.getElementById('inputContainer');
-    const searchButton = document.getElementById('searchButton');
     const resultContainer = document.getElementById('resultContainer');
-    const siteInput = document.getElementById('siteInput');
-    const telegramInput = document.getElementById('telegramInput');
 
     // Статические данные для тестирования
     const data = [
@@ -51,15 +48,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function searchClient() {
-        const site = siteInput.value;
-        const telegram = telegramInput.value;
+        const siteInput = document.getElementById('siteInput').value;
+        const telegramInput = document.getElementById('telegramInput').value;
 
         const response = await fetch('/search_client', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ site_link: site, contact_client: telegram })
+            body: JSON.stringify({ site_link: siteInput, contact_client: telegramInput })
         });
 
         const result = await response.json();
@@ -75,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         } else {
-            resultContainer.innerHTML = `<p>Пользователь с такими данными (${site}, ${telegram}) не найден.</p>`;
+            resultContainer.innerHTML = `<p>Пользователь с такими данными (${siteInput}, ${telegramInput}) не найден.</p>`;
         }
     }
 
